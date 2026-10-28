@@ -37,7 +37,6 @@ The assigned program, `ecommerce_cart_system.py`, implements basic shopping cart
 
 - `ecommerce_cart_system.py` — Corrected Python program.
 - `issues.md` — Issues identified and their fixes.
-- `reflection.md` — Lab reflection.
 - `pylint_report_before.txt` and `pylint_report_after.txt` — Pylint reports.
 - `bandit_report_before.txt` and `bandit_report_after.txt` — Bandit reports.
 - `flake8_report_before.txt` and `flake8_report_after.txt` — Flake8 reports.
