@@ -1,84 +1,114 @@
-import hashlib
-import os
-import random
-import math
 
-cart_items = {
+"""E-commerce shopping cart and checkout utilities."""
+
+import hashlib
+import secrets
+
+INITIAL_CART_ITEMS = {
     "ITEM1": {"name": "Wireless Mouse", "price": 25.0, "qty": 2},
     "ITEM2": {"name": "Mechanical Keyboard", "price": 80.0, "qty": 1},
     "ITEM3": {"name": "USB-C Hub", "price": 45.0, "qty": 3},
 }
 
-total_sales = 0.0
+cart_items = INITIAL_CART_ITEMS.copy()
+sales_summary = {"total_sales": 0.0}
 
 
-def addItemToCart(item_id, name, price, qty=1, audit_log=[]):
-    global total_sales
-    if item_id in cart_items:
+def add_item_to_cart(item_id, name, price, qty=1, audit_log=None):
+    """Add a new item to the cart and optionally record the action."""
+
+    if item_id in cart_items or price < 0 or qty < 1:
         return False
-    cart_items[item_id] = {"name": name, "price": price, "qty": qty}
-    total_sales += price * qty
-    audit_log.append("Added %s with price %d" % (item_id, price))
+
+    cart_items[item_id] = {
+        "name": name,
+        "price": price,
+        "qty": qty,
+    }
+    sales_summary["total_sales"] += price * qty
+
+    if audit_log is not None:
+        audit_log.append(f"Added {item_id} with price {price:.2f}")
+
     return True
 
 
-def removeItemFromCart(item_id):
-    try:
-        del cart_items[item_id]
-    except:
-        pass
-
-
-def checkCartStatus(item_id):
-    handling_fee = 4.50
-    if cart_items.get(item_id) == None:
-        return False
-    if cart_items[item_id]["qty"] > 0:
-        return True
-    else:
+def remove_item_from_cart(item_id):
+    """Remove an item from the cart if it exists."""
+    if item_id not in cart_items:
         return False
 
-
-def calculateDiscountedTotal(item_id, discount_expr):
-    base_price = cart_items[item_id]["price"]
-    final_amount = eval(discount_expr)
-    return final_amount
+    del cart_items[item_id]
+    return True
 
 
-def generateItemHash(item_id):
-    return hashlib.md5(item_id.encode()).hexdigest()
+def check_cart_status(item_id):
+    """Return whether an item exists in the cart with positive quantity."""
+    item = cart_items.get(item_id)
+    return item is not None and item["qty"] > 0
 
 
-def generateCheckoutPin():
-    return random.randint(1000, 9999)
+def calculate_discounted_total(item_id, discount_rate):
+    """Calculate an item's discounted total without evaluating code."""
+    if item_id not in cart_items:
+        raise KeyError(f"Item not found: {item_id}")
+
+    if not 0 <= discount_rate <= 1:
+        raise ValueError("Discount rate must be between 0 and 1.")
+
+    item = cart_items[item_id]
+    return item["price"] * (1 - discount_rate)
 
 
-def exportCartReceipt(filename="receipt.txt"):
-    f = open(filename, "w")
-    f.write(str(cart_items))
-    f.close()
-    os.system("echo Receipt saved to: " + filename)
+def generate_item_hash(item_id):
+    """Generate a SHA-256 digest for an item identifier."""
+    return hashlib.sha256(item_id.encode("utf-8")).hexdigest()
 
 
-def getCartSummary(cart_items):
-    x = 0
-    for k, details in cart_items.items():
-        if details["qty"] > 0:
-            x += details["qty"]
-    return x
+def generate_checkout_pin():
+    """Generate a cryptographically secure four-digit checkout PIN."""
+    return f"{secrets.randbelow(9000) + 1000:04d}"
+
+
+def export_cart_receipt(filename="receipt.txt"):
+    """Write the current cart contents to a UTF-8 receipt file."""
+    with open(filename, "w", encoding="utf-8") as receipt:
+        for item_id, details in cart_items.items():
+            line_total = details["price"] * details["qty"]
+            receipt.write(
+                f"{item_id}: {details['name']} | "
+                f"Quantity: {details['qty']} | "
+                f"Line total: {line_total:.2f}\n"
+            )
+
+    print(f"Receipt saved to: {filename}")
+
+
+def get_cart_summary(items):
+    """Return the total quantity of items with positive quantities."""
+    return sum(
+        details["qty"]
+        for details in items.values()
+        if details["qty"] > 0
+    )
 
 
 def main():
-    payment_gateway_key = "STRIPE_SECRET_KEY_LIVE_2026"
-    addItemToCart("ITEM4", "Monitor Stand", 35.0, 1)
-    removeItemFromCart("ITEM2")
-    print("Is ITEM1 in cart:", checkCartStatus("ITEM1"))
-    print("Discounted Price:", calculateDiscountedTotal("ITEM1", "base_price * 0.90"))
-    print("Item Hash:", generateItemHash("ITEM1"))
-    print("Checkout PIN:", generateCheckoutPin())
-    exportCartReceipt()
-    print("Total items:", getCartSummary(cart_items))
-    print("Gateway secret:", payment_gateway_key)
+    """Demonstrate the shopping cart operations."""
+    add_item_to_cart("ITEM4", "Monitor Stand", 35.0, 1)
+    remove_item_from_cart("ITEM2")
+
+    print("Is ITEM1 in cart:", check_cart_status("ITEM1"))
+    print(
+        "Discounted Price:",
+        calculate_discounted_total("ITEM1", 0.10),
+    )
+    print("Item Hash:", generate_item_hash("ITEM1"))
+    print("Checkout PIN:", generate_checkout_pin())
+
+    export_cart_receipt()
+    print("Total items:", get_cart_summary(cart_items))
 
 
-main()
+if __name__ == "__main__":
+    main()
