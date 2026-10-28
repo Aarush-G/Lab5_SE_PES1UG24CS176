@@ -1,51 +1,76 @@
-# Lab 5: Static Code Analysis — E-Commerce Cart System
+# Lab 5 — Static Code Analysis
 
-**Your file:** `ecommerce_cart_system.py`
+Software Engineering  
+**SRN:** PES1UG24CS176  
+**Project:** E-Commerce Cart System
 
-Follow the lab handout for the full instructions.
+## Overview
 
-## About the program
+This lab focuses on improving Python code quality, security, and formatting using three static analysis tools: Pylint, Bandit, and Flake8.
 
-An e-commerce shopping cart and checkout manager. It handles item additions, item removals, dynamic promotional discounts, inventory calculations, and receipt exports.
+The assigned program, `ecommerce_cart_system.py`, implements basic shopping cart operations, discount calculations, checkout PIN generation, item hashing, and receipt export.
 
-The code works, but only just. It has quality, style and security problems of the kind Pylint, Flake8 and Bandit are built to find.
+## Tools Used
 
-## What to do
+- **Pylint:** Identifies code-quality issues, naming violations, and potential programming errors.
+- **Bandit:** Detects potentially insecure coding patterns.
+- **Flake8:** Checks Python formatting and PEP 8 compliance.
 
-1. **Run it first** and read the output carefully:
-   ```bash
-   python ecommerce_cart_system.py
-   ```
-   It asks one question. Press Enter to use the default, then try a few inputs of your own. Not every problem in this file is something a tool will flag, so pay attention to output that looks wrong.
+## Issues Addressed
 
-2. **Install the tools:**
-   ```bash
-   pip install pylint bandit flake8
-   ```
+- Replaced unsafe `eval()` usage with validated numeric discount calculations.
+- Replaced MD5 with SHA-256 for item hashing.
+- Used the `secrets` module to generate checkout PINs.
+- Removed shell command execution from receipt export.
+- Fixed the mutable default argument and broad exception handling.
+- Improved function naming, documentation, file handling, and formatting.
 
-3. **Run the analysis** and save the reports:
-   ```bash
-   pylint ecommerce_cart_system.py > pylint_report.txt
-   bandit -r ecommerce_cart_system.py > bandit_report.txt
-   flake8 ecommerce_cart_system.py > flake8_report.txt
-   ```
+## Analysis Results
 
-4. **Document the issues** in `issues.md` using this table (at least 4 rows, high and medium severity first):
+| Tool | Initial Result | Final Result |
+|---|---|---|
+| Pylint | 3.86/10 | 10.00/10 |
+| Bandit | 5 reported issues | No issues identified |
+| Flake8 | 7 reported violations | No violations reported |
 
-   | Issue | Type | Line(s) | Description | Fix Approach |
-   |-------|------|---------|-------------|--------------|
-   | ... | ... | ... | ... | ... |
+## Repository Contents
 
-5. **Fix the code.** Fix at least 4 of the issues you documented, then rerun all three tools to confirm they are gone. Repeat until you are satisfied. The program should still do its job when you are done.
+- `ecommerce_cart_system.py` — Corrected Python program.
+- `issues.md` — Issues identified and their fixes.
+- `reflection.md` — Lab reflection.
+- `pylint_report_before.txt` and `pylint_report_after.txt` — Pylint reports.
+- `bandit_report_before.txt` and `bandit_report_after.txt` — Bandit reports.
+- `flake8_report_before.txt` and `flake8_report_after.txt` — Flake8 reports.
 
-6. **Reflect.** Answer the four reflection questions from the handout in `reflection.md`.
+## How to Run
 
-## Deliverables
+Create and activate a virtual environment:
 
-1. `ecommerce_cart_system.py`: your cleaned version, with at least 4 issues fixed.
-2. `issues.md`: the completed issue table.
-3. `reflection.md`: your answers to the reflection questions.
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
 
-**Target:** aim for a Pylint score above 9.5 on your final file. A perfect 10.00/10 is very good.
+Install the analysis tools:
 
-Be ready to explain the bugs you found and how you fixed them. You may be called on to present.
+```bash
+pip install pylint bandit flake8
+```
+
+Run the program:
+
+```bash
+python ecommerce_cart_system.py
+```
+
+Run static analysis:
+
+```bash
+pylint ecommerce_cart_system.py
+bandit -r ecommerce_cart_system.py
+flake8 ecommerce_cart_system.py
+```
+
+## Conclusion
+
+Static analysis helped identify and correct security vulnerabilities, code-quality problems, and formatting violations. After the fixes, the program achieved a Pylint score of 10.00/10, with no findings reported by Bandit or Flake8.
